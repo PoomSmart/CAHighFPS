@@ -18,6 +18,10 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
         self.preferredFramesPerSecond = 0;
 }
 
+- (void)setPreferredFramesPerSecond:(NSInteger)fps {
+    %orig(0);
+}
+
 %end
 
 %ctor {
