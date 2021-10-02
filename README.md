@@ -2,7 +2,7 @@
 
 Make your CoreAnimation applications use the highest available FPS.
  
-## CADisplayLink
+## MVP: CADisplayLink
  
 Quoting from [Apple](https://developer.apple.com/documentation/quartzcore/cadisplaylink), `CADisplayLink` is a timer object that allows your app to synchronize its drawing to the refresh rate of the display. A5 devices (iPhone 4s and iPad 2) are the first to introduce 60 HZ refresh rate - and that the applications can run at its best at 60 frames per second (FPS).
 
@@ -27,3 +27,11 @@ Here's the underlying logic of `setPreferredFramesPerSecond:`:
 Again, some applications can explicitly set it to `30` or `60`. Those devices that are capable of higher than that will not be so pleased.
 
 This is where CAHighFPS enforces the value of `preferredFramesPerSecond` to be `0`.
+
+## Battery: Does it drain your battery?
+
+Because CAHighFPS enforces the highest available FPS for the apps, it's only natural that this will consume more energy. Draining may be significant or else. YMMV.
+
+## iPhone 13 with ProMotion Display
+
+You may ask whether this tweak works with these devices. According to my simple analysis of iOS 15.0 QuartzCore simulator binary, although Apple introduced `CAFrameRateRange` that aims to step the FPS up or down depending on situations, CAHighFPS will still be able to override those logics. At any rates, only a real testing speaks.
