@@ -18,7 +18,7 @@
 			<array>
 				<dict>
 					<key>sectionType</key>
-					<string>Visible</string>
+					<string>User</string>
 				</dict>
 			</array>
 			<key>isController</key>
