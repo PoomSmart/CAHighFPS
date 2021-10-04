@@ -20,6 +20,10 @@
 					<key>sectionType</key>
 					<string>User</string>
 				</dict>
+				<dict>
+					<key>sectionType</key>
+					<string>System</string>
+				</dict>
 			</array>
 			<key>isController</key>
 			<true />

@@ -5,8 +5,7 @@
 #import "../PSPrefs/PSPrefs.x"
 
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
-    NSDictionary *preferences = Prefs();
-    NSArray <NSString *> *value = preferences[@"CAHighFPS"];
+    NSArray <NSString *> *value = Prefs()[@"CAHighFPS"];
     return [value containsObject:bundleIdentifier];
 }
 
