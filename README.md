@@ -2,7 +2,7 @@
 
 Make your CoreAnimation applications use the highest available FPS.
  
-## MVP: CADisplayLink
+## Part 1: CADisplayLink
  
 Quoting from [Apple](https://developer.apple.com/documentation/quartzcore/cadisplaylink), `CADisplayLink` is a timer object that allows your app to synchronize its drawing to the refresh rate of the display. A5 devices (iPhone 4s and iPad 2) are the first to introduce 60 HZ refresh rate - and that the applications can run at its best at 60 frames per second (FPS).
 
@@ -28,10 +28,23 @@ Again, some applications can explicitly set it to `30` or `60`. Those devices th
 
 This is where CAHighFPS enforces the value of `preferredFramesPerSecond` to be `0`.
 
-## Battery: Does it drain your battery?
+## Part 2: CAMetalLayer
+
+Metal has been a thing since iOS 8. While I played around games that use Metal engine, I noticed that the FPS doesn't go up to 120 FPS on the 120 Hz display. Then, through using FLEX, I discovered a pair of properties that need to be set as follows:
+
+```objc
+metalLayer.allowsNextDrawableTimeout = NO; // iOS 11+
+metalLayer.drawableTimeoutSeconds = 0; // private, iOS ~12+
+```
+
+Games like Asphalt 8 and 9, they might have gotten better but that might be just me. It looks promising, however, on games like Jelly Defense.
+
+## Everything Else
+
+### Battery: Does it drain your battery?
 
 Because CAHighFPS enforces the highest available FPS for the apps, it's only natural that this will consume more energy. Draining may be significant or else. YMMV.
 
-## iPhone 13 with ProMotion Display
+### ProMotion Display: iPhone 13 compatibility
 
 You may ask whether this tweak works with these devices. According to my simple analysis of iOS 15.0 QuartzCore simulator binary, although Apple introduced `CAFrameRateRange` that aims to step the FPS up or down depending on situations, CAHighFPS will still be able to override those logics. At any rates, only a real testing speaks.
