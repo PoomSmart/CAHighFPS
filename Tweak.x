@@ -1,6 +1,7 @@
 #define tweakIdentifier @"com.ps.coreanimationhighfps"
 #define CHECK_TARGET
 
+#import <QuartzCore/QuartzCore.h>
 #import "../PS.h"
 #import "../PSPrefs/PSPrefs.x"
 
