@@ -16,6 +16,9 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 #pragma mark - CADisplayLink
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunguarded-availability-new"
+
 %hook CADisplayLink
 
 - (void)setFrameInterval:(NSInteger)interval {
@@ -28,7 +31,15 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
     %orig(0);
 }
 
+- (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
+    range.maximum = 120;
+    range.preferred = 120;
+    %orig;
+}
+
 %end
+
+#pragma clang diagnostic pop
 
 #pragma mark - CAMetalLayer
 

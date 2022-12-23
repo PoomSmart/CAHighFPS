@@ -28,6 +28,10 @@ Again, some applications can explicitly set it to `30` or `60`. Those devices th
 
 This is where CAHighFPS enforces the value of `preferredFramesPerSecond` to be `0`.
 
+### Preferred Framerate Range
+
+Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. As we want to ensure the maximum FPS, the `maximum` and `preferred` properties of `CAFrameRateRange` can just be `120`. The devices that support up to 60 FPS will only go up to 60 FPS. 
+
 ## Part 2: CAMetalLayer
 
 Metal has been a thing since iOS 8. While I played around games that use Metal engine, I noticed that the FPS doesn't go up to 120 FPS on the 120 Hz display. Then, through using FLEX, I discovered a pair of properties that need to be set as follows:
