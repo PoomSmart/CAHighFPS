@@ -1,6 +1,7 @@
 #define tweakIdentifier @"com.ps.coreanimationhighfps"
 #define CHECK_TARGET
 
+#import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <HBLog.h>
 #import "../PS.h"
@@ -33,9 +34,10 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 }
 
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
-    range.minimum = 0;
-    range.maximum = 0;
-    range.preferred = 0;
+    CGFloat max = [UIScreen mainScreen].maximumFramesPerSecond;
+    range.minimum = 30;
+    range.preferred = max;
+    range.maximum = max;
     %orig;
 }
 
@@ -87,18 +89,25 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 #pragma mark - 60Hz APT
 
+%group APT
+
 bool *CADevicePrefers60HzAPT;
 void (*CADevicePrefers60HzAPT_block_invoke)(void);
 %hookf(void, CADevicePrefers60HzAPT_block_invoke) {
     *CADevicePrefers60HzAPT = false;
 }
 
+%end
+
 %ctor {
     if (isTarget(TargetTypeApps) && shouldEnableForBundleIdentifier(NSBundle.mainBundle.bundleIdentifier)) {
-        MSImageRef ref = MSGetImageByName("/System/Library/Frameworks/QuartzCore.framework/QuartzCore");
-        CADevicePrefers60HzAPT_block_invoke = (void (*)(void))MSFindSymbol(ref, "___CADevicePrefers60HzAPT_block_invoke");
-        CADevicePrefers60HzAPT = (bool *)MSFindSymbol(ref, "__ZZ22CADevicePrefers60HzAPTE1b");
-        HBLogDebug(@"CAHighFPS symbols found: %d %d", CADevicePrefers60HzAPT_block_invoke != NULL, CADevicePrefers60HzAPT != NULL);
+        if (IS_IOS_OR_NEWER(iOS_15_0)) {
+            MSImageRef ref = MSGetImageByName("/System/Library/Frameworks/QuartzCore.framework/QuartzCore");
+            CADevicePrefers60HzAPT_block_invoke = (void (*)(void))MSFindSymbol(ref, "___CADevicePrefers60HzAPT_block_invoke");
+            CADevicePrefers60HzAPT = (bool *)MSFindSymbol(ref, "__ZZ22CADevicePrefers60HzAPTE1b");
+            HBLogDebug(@"CAHighFPS symbols found: %d %d", CADevicePrefers60HzAPT_block_invoke != NULL, CADevicePrefers60HzAPT != NULL);
+            %init(APT);
+        }
         %init;
     }
 }

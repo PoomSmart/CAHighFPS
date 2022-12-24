@@ -30,7 +30,7 @@ This is where CAHighFPS enforces the value of `preferredFramesPerSecond` to be `
 
 ### Preferred Framerate Range
 
-Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. As we want to ensure the maximum FPS, all properties of `CAFrameRateRange` can just be `0` (no restrictions in FPS).
+Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. As we want to ensure the maximum FPS, the property `preferred` and `maximum` of `CAFrameRateRange` will be set to the highest supported FPS by the device.
 
 ### CADevicePrefers60HzAPT
 
