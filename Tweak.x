@@ -2,6 +2,7 @@
 #define CHECK_TARGET
 
 #import <QuartzCore/QuartzCore.h>
+#import <HBLog.h>
 #import "../PS.h"
 #import "../PSPrefs/PSPrefs.x"
 
@@ -32,8 +33,9 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 }
 
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
-    range.maximum = 120;
-    range.preferred = 120;
+    range.minimum = 0;
+    range.maximum = 0;
+    range.preferred = 0;
     %orig;
 }
 
@@ -83,8 +85,20 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 // %end
 
+#pragma mark - 60Hz APT
+
+bool *CADevicePrefers60HzAPT;
+void (*CADevicePrefers60HzAPT_block_invoke)(void);
+%hookf(void, CADevicePrefers60HzAPT_block_invoke) {
+    *CADevicePrefers60HzAPT = false;
+}
+
 %ctor {
     if (isTarget(TargetTypeApps) && shouldEnableForBundleIdentifier(NSBundle.mainBundle.bundleIdentifier)) {
+        MSImageRef ref = MSGetImageByName("/System/Library/Frameworks/QuartzCore.framework/QuartzCore");
+        CADevicePrefers60HzAPT_block_invoke = (void (*)(void))MSFindSymbol(ref, "___CADevicePrefers60HzAPT_block_invoke");
+        CADevicePrefers60HzAPT = (bool *)MSFindSymbol(ref, "__ZZ22CADevicePrefers60HzAPTE1b");
+        HBLogDebug(@"CAHighFPS symbols found: %d %d", CADevicePrefers60HzAPT_block_invoke != NULL, CADevicePrefers60HzAPT != NULL);
         %init;
     }
 }

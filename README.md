@@ -30,7 +30,11 @@ This is where CAHighFPS enforces the value of `preferredFramesPerSecond` to be `
 
 ### Preferred Framerate Range
 
-Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. As we want to ensure the maximum FPS, the `maximum` and `preferred` properties of `CAFrameRateRange` can just be `120`. The devices that support up to 60 FPS will only go up to 60 FPS. 
+Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadisplaylink/3875343-preferredframeraterange?language=objc), this is now their main way of dictating the effective FPS. As we want to ensure the maximum FPS, all properties of `CAFrameRateRange` can just be `0` (no restrictions in FPS).
+
+### CADevicePrefers60HzAPT
+
+Also introduced in iOS 15 but this is a private C++ flag, in my educated guess, it is set to true if device type is one of the iPhone 13 models. Its function is as its name suggests - limiting refresh rate to 60Hz. There is a bug in iOS < 15.4 bug where these devices can only go up to 60 FPS in non-Apple apps. I do not know the exact characteristic of this bug but figured if the device is not considered to be locked at 60Hz in the first place, such bug should not exist.
 
 ## Part 2: CAMetalLayer
 
@@ -48,7 +52,3 @@ Games like Asphalt 8 and 9, they might have gotten better but that might be just
 ### Battery: Does it drain your battery?
 
 Because CAHighFPS enforces the highest available FPS for the apps, it's only natural that this will consume more energy. Draining may be significant or else. YMMV.
-
-### ProMotion Display: iPhone 13 compatibility
-
-You may ask whether this tweak works with these devices. According to my simple analysis of iOS 15.0 QuartzCore simulator binary, although Apple introduced `CAFrameRateRange` that aims to step the FPS up or down depending on situations, CAHighFPS will still be able to override those logics. At any rates, only a real testing speaks.
