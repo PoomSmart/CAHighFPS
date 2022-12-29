@@ -34,14 +34,7 @@ Introduced in [iOS 15](https://developer.apple.com/documentation/quartzcore/cadi
 
 ## Part 2: CAMetalLayer
 
-Metal has been a thing since iOS 8. While I played around games that use Metal engine, I noticed that the FPS doesn't go up to 120 FPS on the 120 Hz display. Then, through using FLEX, I discovered a pair of properties that need to be set as follows:
-
-```objc
-metalLayer.allowsNextDrawableTimeout = NO; // iOS 11+
-metalLayer.drawableTimeoutSeconds = 0; // private, iOS ~12+
-```
-
-Games like Asphalt 8 and 9, they might have gotten better but that might be just me. It looks promising, however, on games like Jelly Defense.
+Metal has been a thing since iOS 8. For some reasons, there are not a lot of discussions about optimizing Metal apps for ProMotion display. The best I found are to override `-[CAMetalLayer maximumDrawableCount]` ([reference](https://blog.csdn.net/ByteDanceTech/article/details/123437098)) and `-[CAMetalDrawable presentAfterMinimumDuration:]` to allow for ideal ProMotion FPS.
 
 ## Everything Else
 

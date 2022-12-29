@@ -3,13 +3,20 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import <HBLog.h>
 #import "../PS.h"
 #import "../PSPrefs/PSPrefs.x"
 
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
 @end
+
+static NSInteger maxFPS = -1;
+
+static NSInteger getMaxFPS() {
+    if (maxFPS == -1)
+        maxFPS = [UIScreen mainScreen].maximumFramesPerSecond;
+    return maxFPS;
+} 
 
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
     NSArray <NSString *> *value = Prefs()[@"CAHighFPS"];
@@ -34,7 +41,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 }
 
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
-    CGFloat max = [UIScreen mainScreen].maximumFramesPerSecond;
+    CGFloat max = getMaxFPS();
     range.minimum = 30;
     range.preferred = max;
     range.maximum = max;
@@ -49,46 +56,55 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 %hook CAMetalLayer
 
-- (id)init {
-    self = %orig;
-    if (@available(iOS 11.0, *)) {
-        self.allowsNextDrawableTimeout = NO;
-        if ([self respondsToSelector:@selector(setDrawableTimeoutSeconds:)])
-            self.drawableTimeoutSeconds = 0;
-    }
-    return self;
+- (NSUInteger)maximumDrawableCount {
+    return 2;
 }
 
-- (CGFloat)drawableTimeoutSeconds {
-    return 0;
-}
-
-- (void)setDrawableTimeoutSeconds:(CGFloat)seconds {
-    %orig(0);
-}
-
-- (BOOL)allowsNextDrawableTimeout {
-    return NO;
-}
-
-- (void)setAllowsNextDrawableTimeout:(BOOL)allowed {
-    %orig(NO);
+- (void)setMaximumDrawableCount:(NSUInteger)count {
+    %orig(2);
 }
 
 %end
 
-// #pragma mark - Metal Advanced Hack
+#pragma mark - Metal Advanced Hack
 
-// %hook MTLCommandBuffer
+%hook CAMetalDrawable
 
-// - (void)presentDrawable:(id)drawable afterMinimumDuration:(CFTimeInterval)minimumDuration {
-//     %orig(drawable, 1.0 / 120);
+- (void)presentAfterMinimumDuration:(CFTimeInterval)duration {
+	%orig(1.0 / getMaxFPS());
+}
+
+%end
+
+%hook MTLCommandBuffer
+
+- (void)presentDrawable:(id)drawable afterMinimumDuration:(CFTimeInterval)minimumDuration {
+    %orig(drawable, 1.0 / getMaxFPS());
+}
+
+%end
+
+// #pragma mark - UIKit
+
+// BOOL (*_UIUpdateCycleSchedulerEnabled)(void);
+
+// %group UIKit
+
+// %hookf(BOOL, _UIUpdateCycleSchedulerEnabled) {
+//     return YES;
 // }
 
 // %end
 
 %ctor {
     if (isTarget(TargetTypeApps) && shouldEnableForBundleIdentifier(NSBundle.mainBundle.bundleIdentifier)) {
+        // if (IS_IOS_OR_NEWER(iOS_15_0)) { // iOS 15.0 only?
+        //     MSImageRef ref = MSGetImageByName("/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore");
+        //     _UIUpdateCycleSchedulerEnabled = (BOOL (*)(void))MSFindSymbol(ref, "__UIUpdateCycleSchedulerEnabled");
+        //     if (_UIUpdateCycleSchedulerEnabled) {
+        //         %init(UIKit);
+        //     }
+        // }
         %init;
     }
 }
