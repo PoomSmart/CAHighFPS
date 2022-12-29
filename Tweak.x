@@ -87,27 +87,8 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 // %end
 
-#pragma mark - 60Hz APT
-
-%group APT
-
-bool *CADevicePrefers60HzAPT;
-void (*CADevicePrefers60HzAPT_block_invoke)(void);
-%hookf(void, CADevicePrefers60HzAPT_block_invoke) {
-    *CADevicePrefers60HzAPT = false;
-}
-
-%end
-
 %ctor {
     if (isTarget(TargetTypeApps) && shouldEnableForBundleIdentifier(NSBundle.mainBundle.bundleIdentifier)) {
-        if (IS_IOS_OR_NEWER(iOS_15_0)) {
-            MSImageRef ref = MSGetImageByName("/System/Library/Frameworks/QuartzCore.framework/QuartzCore");
-            CADevicePrefers60HzAPT_block_invoke = (void (*)(void))MSFindSymbol(ref, "___CADevicePrefers60HzAPT_block_invoke");
-            CADevicePrefers60HzAPT = (bool *)MSFindSymbol(ref, "__ZZ22CADevicePrefers60HzAPTE1b");
-            HBLogDebug(@"CAHighFPS symbols found: %d %d", CADevicePrefers60HzAPT_block_invoke != NULL, CADevicePrefers60HzAPT != NULL);
-            %init(APT);
-        }
         %init;
     }
 }

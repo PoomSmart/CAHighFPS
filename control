@@ -1,6 +1,6 @@
 Package: com.ps.cahighfps
 Name: CAHighFPS
-Version: 1.0.0
+Version: 1.1.2
 Architecture: iphoneos-arm
 Description: Make CoreAnimation apps use the highest available FPS.
 Maintainer: PoomSmart
