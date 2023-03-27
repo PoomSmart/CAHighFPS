@@ -3,7 +3,7 @@
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
-#import "../PS.h"
+#import <PSHeader/PS.h>
 #import "../PSPrefs/PSPrefs.x"
 
 @interface CAMetalLayer (Private)

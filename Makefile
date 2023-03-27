@@ -1,4 +1,5 @@
-TARGET := iphone:clang:latest:7.0
+TARGET = iphone:clang:latest:7.0
+PACKAGE_VERSION = 1.3.0
 
 include $(THEOS)/makefiles/common.mk
 
@@ -11,4 +12,4 @@ include $(THEOS_MAKE_PATH)/tweak.mk
 
 internal-stage::
 	$(ECHO_NOTHING)mkdir -p $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences$(ECHO_END)
-	$(ECHO_NOTHING)cp -R Resources $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/$(TWEAK_NAME)$(ECHO_END)
+	$(ECHO_NOTHING)cp entry.plist $(THEOS_STAGING_DIR)/Library/PreferenceLoader/Preferences/$(TWEAK_NAME).plist$(ECHO_END)
