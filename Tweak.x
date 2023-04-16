@@ -1,10 +1,11 @@
-#define tweakIdentifier @"com.ps.coreanimationhighfps"
 #define CHECK_TARGET
 
 #import <UIKit/UIKit.h>
 #import <QuartzCore/QuartzCore.h>
 #import <PSHeader/PS.h>
-#import "../PSPrefs/PSPrefs.x"
+
+#define key CFSTR("CAHighFPS")
+#define domain CFSTR("com.apple.UIKit")
 
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
@@ -19,8 +20,11 @@ static NSInteger getMaxFPS() {
 } 
 
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
-    NSArray <NSString *> *value = Prefs()[@"CAHighFPS"];
-    return [value containsObject:bundleIdentifier];
+    const void *value = CFPreferencesCopyAppValue(key, domain);
+    if (value == NULL)
+        value = CFPreferencesCopyValue(key, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    NSArray <NSString *> *nsValue = (__bridge NSArray <NSString *> *)value;
+    return [nsValue containsObject:bundleIdentifier];
 }
 
 #pragma mark - CADisplayLink

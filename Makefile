@@ -1,5 +1,9 @@
-TARGET = iphone:clang:latest:7.0
-PACKAGE_VERSION = 1.3.0
+ifeq ($(THEOS_PACKAGE_SCHEME),rootless)
+	TARGET = iphone:clang:latest:14.0
+else
+	TARGET = iphone:clang:latest:7.0
+endif
+PACKAGE_VERSION = 1.3.1
 
 include $(THEOS)/makefiles/common.mk
 
