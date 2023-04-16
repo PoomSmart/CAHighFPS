@@ -4,9 +4,6 @@
 #import <QuartzCore/QuartzCore.h>
 #import <PSHeader/PS.h>
 
-#define key CFSTR("CAHighFPS")
-#define domain CFSTR("com.apple.UIKit")
-
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
 @end
@@ -17,14 +14,12 @@ static NSInteger getMaxFPS() {
     if (maxFPS == -1)
         maxFPS = [UIScreen mainScreen].maximumFramesPerSecond;
     return maxFPS;
-} 
+}
 
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
-    const void *value = CFPreferencesCopyAppValue(key, domain);
-    if (value == NULL)
-        value = CFPreferencesCopyValue(key, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    NSArray <NSString *> *nsValue = (__bridge NSArray <NSString *> *)value;
-    return [nsValue containsObject:bundleIdentifier];
+    NSDictionary *prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.ps.coreanimationhighfps"];
+    NSArray <NSString *> *value = [prefs objectForKey:@"CAHighFPS"];
+    return ![value containsObject:bundleIdentifier];
 }
 
 #pragma mark - CADisplayLink
