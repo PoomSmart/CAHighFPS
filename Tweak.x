@@ -30,7 +30,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %hook CADisplayLink
 
 - (void)setFrameInterval:(NSInteger)interval {
-    %orig(1);
+    %orig(0);
     if ([self respondsToSelector:@selector(setPreferredFramesPerSecond:)])
         self.preferredFramesPerSecond = 0;
 }
