@@ -8,6 +8,14 @@
 @property (assign) CGFloat drawableTimeoutSeconds;
 @end
 
+#ifndef __IPHONE_15_0
+typedef struct {
+    NSInteger minimum;
+    NSInteger preferred;
+    NSInteger maximum;
+} CAFrameRateRange;
+#endif
+
 static NSInteger maxFPS = -1;
 
 static NSInteger getMaxFPS() {
@@ -23,9 +31,6 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 }
 
 #pragma mark - CADisplayLink
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunguarded-availability-new"
 
 %hook CADisplayLink
 
@@ -49,8 +54,6 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 
 %end
 
-#pragma clang diagnostic pop
-
 #pragma mark - CAMetalLayer
 
 %hook CAMetalLayer
@@ -70,7 +73,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %hook CAMetalDrawable
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration {
-	%orig(1.0 / getMaxFPS());
+    %orig(1.0 / getMaxFPS());
 }
 
 %end
