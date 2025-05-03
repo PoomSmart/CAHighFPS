@@ -1,6 +1,6 @@
 # CAHighFPS
 
-Make your CoreAnimation applications use the highest available FPS.
+Makes your CoreAnimation applications use the highest available FPS.
  
 ## Part 1: CADisplayLink
  

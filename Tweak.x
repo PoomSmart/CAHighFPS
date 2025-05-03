@@ -1,8 +1,11 @@
 #define CHECK_TARGET
 
-#import <UIKit/UIKit.h>
-#import <QuartzCore/QuartzCore.h>
 #import <PSHeader/PS.h>
+#import <QuartzCore/QuartzCore.h>
+#import <UIKit/UIKit.h>
+
+#define domain CFSTR("com.apple.UIKit")
+#define key CFSTR("CAHighFPS")
 
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
@@ -25,9 +28,13 @@ static NSInteger getMaxFPS() {
 }
 
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
-    NSDictionary *prefs = [[NSUserDefaults standardUserDefaults] persistentDomainForName:@"com.ps.coreanimationhighfps"];
-    NSArray <NSString *> *value = [prefs objectForKey:@"CAHighFPS"];
-    return ![value containsObject:bundleIdentifier];
+    if ([bundleIdentifier isEqualToString:@"com.apple.springboard"])
+        return NO;
+    const void *value = CFPreferencesCopyAppValue(key, domain);
+    if (value == NULL)
+        value = CFPreferencesCopyValue(key, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    NSArray <NSString *> *nsValue = (__bridge NSArray <NSString *> *)value;
+    return [nsValue containsObject:bundleIdentifier];
 }
 
 #pragma mark - CADisplayLink
