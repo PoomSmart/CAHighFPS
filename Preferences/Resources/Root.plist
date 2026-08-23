@@ -1,0 +1,129 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>items</key>
+		<array>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>footerText</key>
+				<string>Forces enabled CoreAnimation apps to run at the highest refresh rate of the device, or at a custom FPS you choose.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>label</key>
+				<string>FPS</string>
+				<key>footerText</key>
+				<string>0 uses the highest refresh rate of the device. Values above the display limit are clamped. Reopen apps after changing this.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSSliderCell</string>
+				<key>defaults</key>
+				<string>com.apple.UIKit</string>
+				<key>key</key>
+				<string>CAHighFPSCustomFPS</string>
+				<key>default</key>
+				<real>0</real>
+				<key>min</key>
+				<real>0</real>
+				<key>max</key>
+				<real>120</real>
+				<key>showValue</key>
+				<true />
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>footerText</key>
+				<string>When enabled, the chosen FPS is applied to all apps except those in Blacklisted Apps. Reopen apps after changing this.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSSwitchCell</string>
+				<key>defaults</key>
+				<string>com.apple.UIKit</string>
+				<key>key</key>
+				<string>CAHighFPSSystemWide</string>
+				<key>default</key>
+				<false />
+				<key>label</key>
+				<string>Systemwide</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>footerText</key>
+				<string>Apps that receive the chosen FPS when Systemwide is off.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSLinkListCell</string>
+				<key>detail</key>
+				<string>ATLApplicationListMultiSelectionController</string>
+				<key>defaults</key>
+				<string>com.apple.UIKit</string>
+				<key>key</key>
+				<string>CAHighFPS</string>
+				<key>label</key>
+				<string>Applications</string>
+				<key>sections</key>
+				<array>
+					<dict>
+						<key>sectionType</key>
+						<string>User</string>
+					</dict>
+					<dict>
+						<key>sectionType</key>
+						<string>System</string>
+					</dict>
+				</array>
+				<key>showIdentifiersAsSubtitle</key>
+				<true />
+				<key>defaultApplicationSwitchValue</key>
+				<false />
+				<key>useSearchBar</key>
+				<true />
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSGroupCell</string>
+				<key>footerText</key>
+				<string>Apps excluded when Systemwide is on.</string>
+			</dict>
+			<dict>
+				<key>cell</key>
+				<string>PSLinkListCell</string>
+				<key>detail</key>
+				<string>ATLApplicationListMultiSelectionController</string>
+				<key>defaults</key>
+				<string>com.apple.UIKit</string>
+				<key>key</key>
+				<string>CAHighFPSBlacklist</string>
+				<key>label</key>
+				<string>Blacklisted Apps</string>
+				<key>sections</key>
+				<array>
+					<dict>
+						<key>sectionType</key>
+						<string>User</string>
+					</dict>
+					<dict>
+						<key>sectionType</key>
+						<string>System</string>
+					</dict>
+				</array>
+				<key>showIdentifiersAsSubtitle</key>
+				<true />
+				<key>defaultApplicationSwitchValue</key>
+				<false />
+				<key>useSearchBar</key>
+				<true />
+			</dict>
+		</array>
+		<key>title</key>
+		<string>CAHighFPS</string>
+	</dict>
+</plist>

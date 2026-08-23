@@ -5,7 +5,10 @@
 #import <UIKit/UIKit.h>
 
 #define domain CFSTR("com.apple.UIKit")
-#define key CFSTR("CAHighFPS")
+#define whitelistKey CFSTR("CAHighFPS")
+#define systemWideKey CFSTR("CAHighFPSSystemWide")
+#define blacklistKey CFSTR("CAHighFPSBlacklist")
+#define customFPSKey CFSTR("CAHighFPSCustomFPS")
 
 @interface CAMetalLayer (Private)
 @property (assign) CGFloat drawableTimeoutSeconds;
@@ -20,6 +23,31 @@ typedef struct {
 #endif
 
 static NSInteger maxFPS = -1;
+static NSInteger customFPS = 0;
+static BOOL systemWide = NO;
+static NSArray<NSString *> *whitelist;
+static NSArray<NSString *> *blacklist;
+
+static id copyPrefValue(CFStringRef prefKey) {
+    CFTypeRef value = CFPreferencesCopyAppValue(prefKey, domain);
+    if (value == NULL)
+        value = CFPreferencesCopyValue(prefKey, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    return value ? (__bridge_transfer id)value : nil;
+}
+
+static void loadPreferences() {
+    id systemWideValue = copyPrefValue(systemWideKey);
+    systemWide = [systemWideValue isKindOfClass:[NSNumber class]] && [systemWideValue boolValue];
+
+    id whitelistValue = copyPrefValue(whitelistKey);
+    whitelist = [whitelistValue isKindOfClass:[NSArray class]] ? whitelistValue : nil;
+
+    id blacklistValue = copyPrefValue(blacklistKey);
+    blacklist = [blacklistValue isKindOfClass:[NSArray class]] ? blacklistValue : nil;
+
+    id customFPSValue = copyPrefValue(customFPSKey);
+    customFPS = [customFPSValue isKindOfClass:[NSNumber class]] ? (NSInteger)lround([customFPSValue doubleValue]) : 0;
+}
 
 static NSInteger getMaxFPS() {
     if (maxFPS == -1)
@@ -27,14 +55,24 @@ static NSInteger getMaxFPS() {
     return maxFPS;
 }
 
+static NSInteger getTargetFPS() {
+    NSInteger max = getMaxFPS();
+    if (customFPS <= 0 || customFPS >= max)
+        return max;
+    return customFPS;
+}
+
+static BOOL usesCustomFPS() {
+    NSInteger max = getMaxFPS();
+    return customFPS > 0 && customFPS < max;
+}
+
 static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
     if ([bundleIdentifier isEqualToString:@"com.apple.springboard"])
         return NO;
-    const void *value = CFPreferencesCopyAppValue(key, domain);
-    if (value == NULL)
-        value = CFPreferencesCopyValue(key, domain, kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
-    NSArray <NSString *> *nsValue = (__bridge NSArray <NSString *> *)value;
-    return [nsValue containsObject:bundleIdentifier];
+    if (systemWide)
+        return ![blacklist containsObject:bundleIdentifier];
+    return [whitelist containsObject:bundleIdentifier];
 }
 
 #pragma mark - CADisplayLink
@@ -42,20 +80,28 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %hook CADisplayLink
 
 - (void)setFrameInterval:(NSInteger)interval {
-    %orig(1);
+    NSInteger target = getTargetFPS();
+    NSInteger newInterval = (NSInteger)lround((double)getMaxFPS() / (double)target);
+    %orig(newInterval < 1 ? 1 : newInterval);
     if ([self respondsToSelector:@selector(setPreferredFramesPerSecond:)])
-        self.preferredFramesPerSecond = 0;
+        self.preferredFramesPerSecond = usesCustomFPS() ? target : 0;
 }
 
 - (void)setPreferredFramesPerSecond:(NSInteger)fps {
-    %orig(0);
+    %orig(usesCustomFPS() ? getTargetFPS() : 0);
 }
 
 - (void)setPreferredFrameRateRange:(CAFrameRateRange)range {
-    CGFloat max = getMaxFPS();
-    range.minimum = 30;
-    range.preferred = max;
-    range.maximum = max;
+    NSInteger target = getTargetFPS();
+    if (usesCustomFPS()) {
+        range.minimum = target;
+        range.preferred = target;
+        range.maximum = target;
+    } else {
+        range.minimum = 30;
+        range.preferred = target;
+        range.maximum = target;
+    }
     %orig;
 }
 
@@ -80,7 +126,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %hook CAMetalDrawable
 
 - (void)presentAfterMinimumDuration:(CFTimeInterval)duration {
-    %orig(1.0 / getMaxFPS());
+    %orig(1.0 / getTargetFPS());
 }
 
 %end
@@ -88,7 +134,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 %hook MTLCommandBuffer
 
 - (void)presentDrawable:(id)drawable afterMinimumDuration:(CFTimeInterval)minimumDuration {
-    %orig(drawable, 1.0 / getMaxFPS());
+    %orig(drawable, 1.0 / getTargetFPS());
 }
 
 %end
@@ -106,6 +152,7 @@ static BOOL shouldEnableForBundleIdentifier(NSString *bundleIdentifier) {
 // %end
 
 %ctor {
+    loadPreferences();
     if (isTarget(TargetTypeApps) && shouldEnableForBundleIdentifier(NSBundle.mainBundle.bundleIdentifier)) {
         // if (IS_IOS_OR_NEWER(iOS_15_0)) { // iOS 15.0 only?
         //     MSImageRef ref = MSGetImageByName("/System/Library/PrivateFrameworks/UIKitCore.framework/UIKitCore");
